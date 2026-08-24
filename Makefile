@@ -6,13 +6,15 @@ FLAGS=-lSDL2 -lGL
 
 RMCOMMAND=rm -f
 
-.PHONY: all run clean compile
+.PHONY: all run clean full
 
 all: clean
 	$(CC) -o $(OUTPUT) $(INPUT) $(FLAGS)
 
-run: all
+run:
 	$(OUTPUT)
+
+full: all run
 
 clean:
 	$(RMCOMMAND) $(OUTPUT)
