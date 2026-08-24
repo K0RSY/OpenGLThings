@@ -1,5 +1,11 @@
 # OpenGLThings
 
+## What is this
+This is a goofy test repository with some random stuff written with `OpenGl` for test and education purposes
+
+> [!WARNING]
+> This repository contains bullshit code because author doesn't give a fuck about code prettiness in test projects
+
 ## How to run
 Install `SDL2` (Native version is `26.5`) and `GLM` (Native version is [`0.9.8`](https://github.com/g-truc/glm/releases/tag/0.9.8.0))
 
