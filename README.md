@@ -32,7 +32,7 @@ make full
 ## Credits
 Libs used:
 - [`SDL2`](https://www.libsdl.org/) for window handling
-- [`GLAD`](https://glad.dav1d.de/) for function pointers loading
+- [`GLAD`](https://glad.dav1d.de/) for `OpenGL` function pointers loading
 - [`GLM`](https://glm.g-truc.net/) for linal
 - [`STB image`](https://github.com/nothings/stb/blob/master/stb_image.h) for image loading
 
