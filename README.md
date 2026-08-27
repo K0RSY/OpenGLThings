@@ -29,6 +29,15 @@ Or just:
 make full
 ```
 
+## Controls
+Keyboard:
+- `W`, `A`, `S`, `D`, `Space`, `Shift` - moving in space
+- `Q`, `E` - rotating along roll
+
+Mouse:
+- Moving mouse on a table - rotating along yaw and pitch
+- Scroll up and down - change FOV
+
 ## Credits
 Libs used:
 - [`SDL2`](https://www.libsdl.org/) for window handling
