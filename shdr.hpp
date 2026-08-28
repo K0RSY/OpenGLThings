@@ -2,7 +2,6 @@
 #define SHDR 1
 
 #include <string>
-#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,25 +12,27 @@ using namespace std;
 using namespace glm;
 
 typedef struct {
-    unsigned int VBO, VAO, EBO, program;
+    uint VBO, VAO, EBO, program;
     float* vertecies;
-    unsigned int* indices;
-    unsigned int vertecies_count, indices_count;
+    uint* indices;
+    uint vertecies_size, indices_size;
 } shdr;
 
 // Define
 shdr shdr_init(
-    float* vertecies, unsigned int* indices,
-    unsigned int vertecies_count, unsigned int indices_count,
+    float* vertecies, uint* indices,
+    uint vertecies_size, uint indices_size,
     const char* vert_path, const char* frag_path,
-    unsigned int attribute_count, unsigned int* attribute_sizes
+    uint attribute_size, uint* attribute_sizes
 );
-unsigned int shdr_init_texture(const char* path);
+uint shdr_init_texture(const char* path);
 
 void shdr_set_unformf(shdr* shader, const char* name, float value);
 void shdr_set_unformi(shdr* shader, const char* name, int value);
 void shdr_set_unformm4(shdr* shader, const char* name, float* value_pointer);
-void shdr_set_texture(shdr* shader, const char* name, unsigned int texture, unsigned int id);
+void shdr_set_unformv3(shdr* shader, const char* name, float* value_pointer);
+void shdr_set_unformv4(shdr* shader, const char* name, vec4 value);
+void shdr_set_texture(shdr* shader, const char* name, uint texture, uint id);
 
 void shdr_clean(shdr* shader);
 void shdr_use(shdr* shader);
@@ -39,17 +40,17 @@ void shdr_draw(shdr* shader);
 
 // Implement
 shdr shdr_init(
-    float* vertecies, unsigned int* indices,
-    unsigned int vertecies_count, unsigned int indices_count,
+    float* vertecies, uint* indices,
+    uint vertecies_size, uint indices_size,
     const char* vert_path, const char* frag_path,
-    unsigned int attribute_count, unsigned int* attribute_sizes
+    uint attribute_size, uint* attribute_sizes
 ) {
     shdr shader;
 
     shader.vertecies = vertecies;
     shader.indices = indices;
-    shader.indices_count = indices_count;
-    shader.vertecies_count = vertecies_count;
+    shader.indices_size = indices_size;
+    shader.vertecies_size = vertecies_size;
 
     // Read shaders code
     string vertex_shader_source_str = rdfl(vert_path);
@@ -58,14 +59,14 @@ shdr shdr_init(
     const char* fragment_shader_source = fragment_shader_source_str.c_str();
 
     // Create vertex shader
-    unsigned int vertex_shader;
+    uint vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 
     glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
     glCompileShader(vertex_shader);
 
     // Create fragment shader
-    unsigned int fragment_shader;
+    uint fragment_shader;
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
     glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
@@ -91,16 +92,16 @@ shdr shdr_init(
     glBindBuffer(GL_ARRAY_BUFFER, shader.VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shader.EBO);
     
-    glBufferData(GL_ARRAY_BUFFER, vertecies_count * sizeof(float), vertecies, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_count * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertecies_size * sizeof(float), vertecies, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size * sizeof(uint), indices, GL_STATIC_DRAW);
 
     int attribute_lenght = 0;
-    for (int i = 0; i < attribute_count; i++) {
+    for (int i = 0; i < attribute_size; i++) {
         attribute_lenght += attribute_sizes[i];
     }
 
     int offset = 0;
-    for (int i = 0; i < attribute_count; i++) {
+    for (int i = 0; i < attribute_size; i++) {
         glVertexAttribPointer(i, attribute_sizes[i], GL_FLOAT, GL_FALSE, attribute_lenght * sizeof(float), (void*) (offset * sizeof(float)));
         glEnableVertexAttribArray(i);
 
@@ -114,7 +115,7 @@ shdr shdr_init(
     return shader;
 };
 
-unsigned int shdr_init_texture(const char* path) {
+uint shdr_init_texture(const char* path) {
 
     // Texture preparing
     int texture_width, texture_height, color_channels_number;
@@ -127,7 +128,7 @@ unsigned int shdr_init_texture(const char* path) {
         &color_channels_number, 0
     );
 
-    unsigned int texture;
+    uint texture;
     glGenTextures(1, &texture);
     
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -170,7 +171,15 @@ void shdr_set_unformm4(shdr* shader, const char* name, float* value_pointer) {
     glUniformMatrix4fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, value_pointer);
 };
 
-void shdr_set_texture(shdr* shader, const char* name, unsigned int texture, unsigned int id) {
+void shdr_set_unformv3(shdr* shader, const char* name, vec3 value) {
+    glUniform3f(glGetUniformLocation(shader->program, name), value.x, value.y, value.z);
+};
+
+void shdr_set_unformv4(shdr* shader, const char* name, vec4 value) {
+    glUniform4f(glGetUniformLocation(shader->program, name), value.x, value.y, value.z, value.w);
+};
+
+void shdr_set_texture(shdr* shader, const char* name, uint texture, uint id) {
     glActiveTexture(GL_TEXTURE0 + id);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -189,7 +198,7 @@ void shdr_use(shdr* shader) {
 };
 
 void shdr_draw(shdr* shader) {
-    glDrawElements(GL_TRIANGLES, shader->indices_count, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, shader->indices_size, GL_UNSIGNED_INT, 0);
 };
 
 #endif

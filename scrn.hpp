@@ -1,7 +1,6 @@
 #ifndef SCRN
 #define SCRN 1
 
-#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,7 +9,7 @@ using namespace std;
 using namespace glm;
 
 typedef struct {
-    unsigned int FBO, RBO, texture;
+    uint FBO, RBO, texture;
     int width, height;
 } scrn;
 

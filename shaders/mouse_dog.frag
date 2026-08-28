@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 Col;
+in float Nor;
 in float Zbf;
 in vec2 Tex;
 
@@ -22,6 +22,8 @@ void main() {
     vec4 finalCol = texture(texture_data, finalTex);
 
     finalCol.a *= ((Zbf) * 3);
+
+    finalCol.rgb *= Nor;
 
     FragColor = finalCol;
 }

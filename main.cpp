@@ -16,6 +16,7 @@
 #include "shdr.hpp"
 #include "cmra.hpp"
 #include "scrn.hpp"
+#include "nrml.hpp"
 
 #define unfduration std::chrono::nanoseconds
 #define second_ratio 1000000000L
@@ -35,12 +36,18 @@ int main() {
     float time = 0;
     float swing;
     float delta_time;
-    mat4 model;
+    mat4 mouse_dog_model;
+    mat4 mouse_dog_normal_model;
+    mat4 light_model;
     mat4 view;
     mat4 projection;
     mat4 billboard;
     mat4 skybox;
     vector<SDL_Keycode> pressed_keys {};
+
+    vec4 light = vec4(3.f, 3.f, 3.f, .2f);
+    vec4 global_light = vec4(normalize(vec3(-1.f, 0.5f, -.9f)), 1.f);
+    float ambient_light = .1f;
     
     gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress);
     
@@ -67,8 +74,8 @@ int main() {
     // Init camera
     cmra camera = cmra_init();
 
-    // Init shader
-    float weapon_vertecies[] = {
+    // Init shaders
+    float plane_vertecies[] = {
         1.f,  1.f,  0.f,    1.f,  0.f,
         1.f, -1.f,  0.f,    1.f,  1.f,
        -1.f, -1.f,  0.f,    0.f,  1.f,
@@ -111,46 +118,42 @@ int main() {
        -1.f, -1.f, -1.f,    .5f, .5f,
         1.f, -1.f, -1.f,    .5f, .75f,
     };
-    float mouse_dog_vertecies[] = {
-        1.f,  1.f,  1.f,    1.f, 0.f, 0.f,    1.f, 0.f,
-        1.f, -1.f,  1.f,    0.f, 1.f, 0.f,    1.f, 1.f,
-       -1.f, -1.f,  1.f,    0.f, 0.f, 1.f,    0.f, 1.f,
+    float cube_vertecies[] = {
+        1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
+        1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
+       -1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
        -1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
 
-        1.f,  1.f, -1.f,    1.f, 0.f, 0.f,    0.f, 0.f,
-        1.f, -1.f, -1.f,    0.f, 1.f, 0.f,    0.f, 1.f,
-       -1.f, -1.f, -1.f,    0.f, 0.f, 1.f,    1.f, 1.f,
+        1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
+        1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
+       -1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
        -1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
 
-        1.f,  1.f,  1.f,    1.f, 0.f, 0.f,    1.f, 0.f,
-        1.f, -1.f,  1.f,    0.f, 1.f, 0.f,    1.f, 1.f,
-        1.f, -1.f, -1.f,    0.f, 0.f, 1.f,    0.f, 1.f,
+        1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
+        1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
+        1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
         1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
 
-       -1.f,  1.f,  1.f,    1.f, 0.f, 0.f,    0.f, 0.f,
-       -1.f, -1.f,  1.f,    0.f, 1.f, 0.f,    0.f, 1.f,
-       -1.f, -1.f, -1.f,    0.f, 0.f, 1.f,    1.f, 1.f,
+       -1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
+       -1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
+       -1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
        -1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
 
-        1.f,  1.f,  1.f,    1.f, 0.f, 0.f,    1.f, 0.f,
-       -1.f,  1.f,  1.f,    0.f, 1.f, 0.f,    1.f, 1.f,
-       -1.f,  1.f, -1.f,    0.f, 0.f, 1.f,    0.f, 1.f,
+        1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
+       -1.f,  1.f,  1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
+       -1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
         1.f,  1.f, -1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
 
-        1.f, -1.f,  1.f,    1.f, 0.f, 0.f,    0.f, 0.f,
-       -1.f, -1.f,  1.f,    0.f, 1.f, 0.f,    0.f, 1.f,
-       -1.f, -1.f, -1.f,    0.f, 0.f, 1.f,    1.f, 1.f,
+        1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 0.f,
+       -1.f, -1.f,  1.f,    0.f, 0.f, 0.f,    0.f, 1.f,
+       -1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 1.f,
         1.f, -1.f, -1.f,    0.f, 0.f, 0.f,    1.f, 0.f,
     };
-    unsigned int weapon_indices[] = {
+    uint plane_indices[] = {
         1, 3, 2,
         1, 0, 3,
     };
-    unsigned int screen_indices[] = {
-        1, 3, 2,
-        1, 0, 3,
-    };
-    unsigned int mouse_dog_indices[] = {
+    uint cube_indices[] = {
         1, 3, 2,
         1, 0, 3,
 
@@ -170,45 +173,57 @@ int main() {
         21, 23, 20,
     };
 
-    unsigned int mouse_dog_attribute_sizes[] = {3, 3, 2};
-    unsigned int skybox_attribute_sizes[] = {3, 2};
-    unsigned int weapon_attribute_sizes[] = {3, 2};
-    unsigned int screen_attribute_sizes[] = {3, 2};
+    nrml_generate_normals(
+        cube_vertecies, cube_indices,
+        sizeof(cube_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
+        0, 3, 8
+    );
+
+    uint pos_nor_tex_attribute_sizes[] = {3, 3, 2};
+    uint pos_tex_attribute_sizes[] = {3, 2};
 
     scrn screen = scrn_init(width, height);
 
     shdr mouse_dog_shader = shdr_init(
-        mouse_dog_vertecies, mouse_dog_indices,
-        sizeof(mouse_dog_vertecies) / sizeof(float), sizeof(mouse_dog_indices) / sizeof(unsigned int),
+        cube_vertecies, cube_indices,
+        sizeof(cube_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
         "shaders/mouse_dog.vert", "shaders/mouse_dog.frag",
-        3, mouse_dog_attribute_sizes
+        3, pos_nor_tex_attribute_sizes
+    );
+
+    shdr light_shader = shdr_init(
+        plane_vertecies, plane_indices,
+        sizeof(plane_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
+        "shaders/light.vert", "shaders/light.frag",
+        2, pos_tex_attribute_sizes
     );
 
     shdr weapon_shader = shdr_init(
-        weapon_vertecies, weapon_indices,
-        sizeof(weapon_vertecies) / sizeof(float), sizeof(weapon_indices) / sizeof(unsigned int),
+        plane_vertecies, plane_indices,
+        sizeof(plane_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
         "shaders/weapon.vert", "shaders/weapon.frag",
-        2, weapon_attribute_sizes
+        2, pos_tex_attribute_sizes
     );
 
     shdr screen_shader = shdr_init(
-        screen_vertecies, screen_indices,
-        sizeof(screen_vertecies) / sizeof(float), sizeof(screen_indices) / sizeof(unsigned int),
+        screen_vertecies, plane_indices,
+        sizeof(screen_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
         "shaders/screen.vert", "shaders/screen.frag",
-        2, screen_attribute_sizes
+        2, pos_tex_attribute_sizes
     );
 
     shdr skybox_shader = shdr_init(
-        skybox_vertecies, mouse_dog_indices,
-        sizeof(skybox_vertecies) / sizeof(float), sizeof(mouse_dog_indices) / sizeof(unsigned int),
+        skybox_vertecies, cube_indices,
+        sizeof(skybox_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
         "shaders/skybox.vert", "shaders/skybox.frag",
-        2, skybox_attribute_sizes
+        2, pos_tex_attribute_sizes
     );
 
-    unsigned int mouse_dog_texture = shdr_init_texture("assets/mouse_dog.png");
-    unsigned int noise_texture = shdr_init_texture("assets/noise.png");
-    unsigned int skybox_texture = shdr_init_texture("assets/skyboxc.png");
-    unsigned int weapon_texture = shdr_init_texture("assets/weapon.png");
+    uint mouse_dog_texture = shdr_init_texture("assets/mouse_dog.png");
+    uint noise_texture = shdr_init_texture("assets/noise.png");
+    uint skybox_texture = shdr_init_texture("assets/skyboxc.png");
+    uint weapon_texture = shdr_init_texture("assets/weapon.png");
+    uint light_texture = shdr_init_texture("assets/light.png");
 
     SDL_Event event;
     while (run) {
@@ -250,13 +265,26 @@ int main() {
 
         cmra_process_tick(&camera, delta_time, window, width, height);
 
-        model = mat4(1.f);
-        model = model;
         
         view = cmra_get_view(&camera);
         skybox = cmra_get_skybox(&camera);
-        billboard = cmra_get_billboard(&camera, view, skybox);
+        billboard = cmra_get_billboard(&camera, skybox);
 
+        mouse_dog_model = mat4(1.f);
+        // mouse_dog_model = translate(mouse_dog_model, vec3(0.f, 2.f, 0.f));
+        mouse_dog_model = mouse_dog_model;
+
+        mouse_dog_normal_model = nrml_get_normal_model(mouse_dog_model);
+
+        vec4 light_eunuch = vec4(light.x, light.y, light.z, 1.f);
+        light_eunuch = rotate(mat4(1.f), radians(30 * delta_time), vec3(0.f, 1.f, 0.f)) * light_eunuch;
+        light = vec4(light_eunuch.x, light_eunuch.y, light_eunuch.z, light.w);
+
+        light_model = mat4(1.f);
+        light_model = translate(light_model, vec3(light));
+        light_model = scale(light_model, vec3(.5f));
+        light_model = light_model * billboard;
+        
         projection = cmra_get_projection(&camera, ((float) width) / ((float) height));
 
         // Draw on screen
@@ -282,7 +310,8 @@ int main() {
 
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        // Draw mouse_dog
+        // Draw world objects
+        // Mouse dog
         glCullFace(GL_BACK);
 
         shdr_use(&mouse_dog_shader);
@@ -291,12 +320,28 @@ int main() {
         shdr_set_texture(&mouse_dog_shader, "texture_datb", noise_texture, 1);
 
         shdr_set_unformf(&mouse_dog_shader, "time", time);
+        shdr_set_unformf(&mouse_dog_shader, "ambient_light", ambient_light);
         
-        shdr_set_unformm4(&mouse_dog_shader, "model", value_ptr(model));
+        shdr_set_unformv4(&mouse_dog_shader, "global_light", global_light);
+        shdr_set_unformv4(&mouse_dog_shader, "light", light);
+
+        shdr_set_unformm4(&mouse_dog_shader, "model", value_ptr(mouse_dog_model));
+        shdr_set_unformm4(&mouse_dog_shader, "normal_model", value_ptr(mouse_dog_normal_model));
         shdr_set_unformm4(&mouse_dog_shader, "view", value_ptr(view));
         shdr_set_unformm4(&mouse_dog_shader, "projection", value_ptr(projection));
         
         shdr_draw(&mouse_dog_shader);
+
+        // Light
+        shdr_use(&light_shader);
+
+        shdr_set_texture(&light_shader, "texture_data", light_texture, 0);
+        
+        shdr_set_unformm4(&light_shader, "model", value_ptr(light_model));
+        shdr_set_unformm4(&light_shader, "view", value_ptr(view));
+        shdr_set_unformm4(&light_shader, "projection", value_ptr(projection));
+        
+        shdr_draw(&light_shader);
         
         glClear(GL_DEPTH_BUFFER_BIT);
 

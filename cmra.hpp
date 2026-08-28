@@ -177,8 +177,8 @@ mat4 cmra_get_view(cmra* camera) {
     return lookAt(camera->position, camera->position + camera->front, camera->up);
 };
 
-mat4 cmra_get_billboard(cmra* camera, mat4 view, mat4 skybox) {
-    return view * inverse(skybox);
+mat4 cmra_get_billboard(cmra* camera, mat4 skybox) {
+    return inverse(skybox);
 };
 
 mat4 cmra_get_skybox(cmra* camera) {
