@@ -45,7 +45,12 @@ int main() {
     mat4 skybox;
     vector<SDL_Keycode> pressed_keys {};
 
-    vec4 light = vec4(3.f, 3.f, 3.f, .2f);
+    mat4 light_rotate;
+    const uint light_count = 2;
+    vec4 lights[] = {
+        vec4(3.f, 3.f, 3.f, .2f),
+        vec4(-3.f, -3.f, -3.f, .2f),
+    };
     vec4 global_light = vec4(normalize(vec3(-1.f, 0.5f, -.9f)), 1.f);
     float ambient_light = .1f;
     
@@ -275,15 +280,6 @@ int main() {
         mouse_dog_model = mouse_dog_model;
 
         mouse_dog_normal_model = nrml_get_normal_model(mouse_dog_model);
-
-        vec4 light_eunuch = vec4(light.x, light.y, light.z, 1.f);
-        light_eunuch = rotate(mat4(1.f), radians(30 * delta_time), vec3(0.f, 1.f, 0.f)) * light_eunuch;
-        light = vec4(light_eunuch.x, light_eunuch.y, light_eunuch.z, light.w);
-
-        light_model = mat4(1.f);
-        light_model = translate(light_model, vec3(light));
-        light_model = scale(light_model, vec3(.5f));
-        light_model = light_model * billboard;
         
         projection = cmra_get_projection(&camera, ((float) width) / ((float) height));
 
@@ -323,7 +319,11 @@ int main() {
         shdr_set_unformf(&mouse_dog_shader, "ambient_light", ambient_light);
         
         shdr_set_unformv4(&mouse_dog_shader, "global_light", global_light);
-        shdr_set_unformv4(&mouse_dog_shader, "light", light);
+        for (uint i = 0; i < light_count; i++) {
+            char stri[16];
+            sprintf(stri, "lights[%d]", i);
+            shdr_set_unformv4(&mouse_dog_shader, stri, lights[i]);
+        }
 
         shdr_set_unformm4(&mouse_dog_shader, "model", value_ptr(mouse_dog_model));
         shdr_set_unformm4(&mouse_dog_shader, "normal_model", value_ptr(mouse_dog_normal_model));
@@ -337,11 +337,23 @@ int main() {
 
         shdr_set_texture(&light_shader, "texture_data", light_texture, 0);
         
-        shdr_set_unformm4(&light_shader, "model", value_ptr(light_model));
         shdr_set_unformm4(&light_shader, "view", value_ptr(view));
         shdr_set_unformm4(&light_shader, "projection", value_ptr(projection));
+
+        light_rotate = rotate(mat4(1.f), radians(30 * delta_time), vec3(0.f, 1.f, 0.f));
         
-        shdr_draw(&light_shader);
+        for (uint i = 0; i < light_count; i++) {
+            lights[i] = light_rotate * lights[i];
+
+            light_model = mat4(1.f);
+            light_model = translate(light_model, vec3(lights[i]));
+            light_model = scale(light_model, vec3(.5f));
+            light_model = light_model * billboard;
+
+            shdr_set_unformm4(&light_shader, "model", value_ptr(light_model));
+
+            shdr_draw(&light_shader);
+        }
         
         glClear(GL_DEPTH_BUFFER_BIT);
 

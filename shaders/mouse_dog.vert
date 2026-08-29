@@ -11,8 +11,10 @@ out vec2 Tex;
 uniform float time;
 uniform float ambient_light;
 
+#define light_count 2
+
 uniform vec4 global_light;
-uniform vec4 light;
+uniform vec4 lights[light_count];
 
 uniform mat4 model;
 uniform mat4 normal_model;
@@ -28,11 +30,12 @@ void main() {
    Pos = model * Pos;
 
    vec3 normal = mat3(normal_model) * aNor;
-   Nor =
-      ambient_light
-      + max(dot(normal, global_light.xyz), 0) * global_light.w
-      + max(dot(normal, light.xyz - Pos.xyz), 0) * light.w;
+   Nor = ambient_light + max(dot(normal, global_light.xyz), 0) * global_light.w;
 
+   for (int i = 0; i < light_count; i++) {
+      Nor += max(dot(normal, lights[i].xyz - Pos.xyz), 0) * lights[i].w;
+   }
+   
    // Pos = billboard * Pos;
    // float coeff = sin(Pos.x / 2 + Pos.y / 2) / 5;
    // Pos = vec4(Pos.x + coeff, Pos.y + coeff, Pos.z, 1.f);
