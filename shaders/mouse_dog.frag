@@ -17,7 +17,7 @@ void main() {
     vec4 noise = texture(texture_datb, Tex);
 
     // finalTex = finalTex + sin(finalTex * 8) / (10 + ((sin(time / 100) + 1) / 2) * 50);
-    finalTex = finalTex + noise.r * (0.1 * sin(time));
+    // finalTex = finalTex + noise.r * (0.1 * sin(time));
     
     vec4 finalCol = texture(texture_data, finalTex);
 

@@ -38,6 +38,9 @@ Keyboard:
 - `W`, `A`, `S`, `D`, `Space`, `Shift` - moving in space
 - `Q`, `E` - rotating along roll
 - `Escape` - toggle mouse lock
+- `F1` - toggle weapon visibility
+- `F2` - toggle screen warping
+- `F3` - toggle lights visibility
 
 Mouse:
 - Moving mouse on a table - rotating along yaw and pitch

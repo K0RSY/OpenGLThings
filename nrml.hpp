@@ -15,7 +15,6 @@ void nrml_generate_normals(
     uint vertecies_size, uint indices_size,
     uint nor_data_start
 );
-mat3 nrml_get_normal_model(mat4 model);
 
 // Implement
 void nrml_generate_normals(
@@ -41,10 +40,6 @@ void nrml_generate_normals(
             vertecies[index[j] + 2] = normal.z;
         }
     }
-};
-
-mat3 nrml_get_normal_model(mat4 model) {
-    return transpose(inverse(model));
 };
 
 #endif

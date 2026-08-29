@@ -29,7 +29,7 @@ void main() {
 
    Pos = model * Pos;
 
-   vec3 normal = mat3(normal_model) * aNor;
+   vec3 normal = normalize(mat3(normal_model) * aNor);
    Nor = ambient_light + max(dot(normal, global_light.xyz), 0) * global_light.w;
 
    for (int i = 0; i < light_count; i++) {
@@ -44,5 +44,5 @@ void main() {
    gl_Position = Pos;
 
    Zbf = Pos.z;
-   Tex = aTex;
+   Tex = vec2(aTex.x, 1 - aTex.y);
 }
