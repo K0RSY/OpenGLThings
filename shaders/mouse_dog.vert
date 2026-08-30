@@ -4,17 +4,12 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNor;
 layout (location = 2) in vec2 aTex;
 
-out float Nor;
+out vec3 normal;
 out float Zbf;
+out vec3 wPos;
 out vec2 Tex;
 
 uniform float time;
-uniform float ambient_light;
-
-#define light_count 2
-
-uniform vec4 global_light;
-uniform vec4 lights[light_count];
 
 uniform mat4 model;
 uniform mat4 normal_model;
@@ -28,13 +23,7 @@ void main() {
    float coeff = sin(time * 5 + Pos.x / 2 + Pos.y / 2) / 5;
 
    Pos = model * Pos;
-
-   vec3 normal = normalize(mat3(normal_model) * aNor);
-   Nor = ambient_light + max(dot(normal, global_light.xyz), 0) * global_light.w;
-
-   for (int i = 0; i < light_count; i++) {
-      Nor += max(dot(normal, lights[i].xyz - Pos.xyz), 0) * lights[i].w;
-   }
+   wPos = Pos.xyz;
    
    // Pos = billboard * Pos;
    // float coeff = sin(Pos.x / 2 + Pos.y / 2) / 5;
@@ -45,4 +34,5 @@ void main() {
 
    Zbf = Pos.z;
    Tex = vec2(aTex.x, 1 - aTex.y);
+   normal = normalize(mat3(normal_model) * aNor);
 }
