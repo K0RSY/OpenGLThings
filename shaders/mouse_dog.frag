@@ -33,6 +33,7 @@ void main() {
     finalCol.a *= min(((Zbf) * 3), 1);
 
     float Nor = vNor;
+    Nor += pow(max(dot(reflect(normalize(-global_light.xyz), normal), normalize(camera_pos - wPos)), 0), 16) * global_light.w;
     for (int i = 0; i < light_count; i++) {
         Nor += pow(max(dot(reflect(normalize(wPos - lights[i].xyz), normal), normalize(camera_pos - wPos)), 0), 16) * lights[i].w;
     }
