@@ -40,5 +40,9 @@ void main() {
 
     finalCol.rgb *= Nor;
 
+    if (finalCol.a < 0.1) {
+        discard;
+    }
+
     FragColor = finalCol;
 }

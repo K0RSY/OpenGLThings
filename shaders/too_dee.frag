@@ -13,6 +13,10 @@ void main() {
     vec4 finalCol = texture(texture_data, finalTex);
 
     finalCol.a *= min(((Zbf) * 3), 1);
+
+    if (finalCol.a < 0.1) {
+        discard;
+    }
     
     FragColor = finalCol;
 }

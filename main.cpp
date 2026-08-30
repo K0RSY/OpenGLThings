@@ -85,10 +85,10 @@ int main() {
 
     // Init shaders
     float plane_vertecies[] = {
-        1.f,  1.f,  0.f,    1.f,  0.f,
-        1.f, -1.f,  0.f,    1.f,  1.f,
-       -1.f, -1.f,  0.f,    0.f,  1.f,
-       -1.f,  1.f,  0.f,    0.f,  0.f,
+        1.f,  1.f,  -1.f,    1.f,  0.f,
+        1.f, -1.f,  -1.f,    1.f,  1.f,
+       -1.f, -1.f,  -1.f,    0.f,  1.f,
+       -1.f,  1.f,  -1.f,    0.f,  0.f,
     };
     float screen_vertecies[] = {
         1.f,  1.f,  0.f,    1.f,   1.f,
@@ -307,10 +307,10 @@ int main() {
         // Draw on screen
         scrn_use(&screen);
 
+        // Draw skybox
+        glEnable(GL_DEPTH_TEST);
         glClearColor(.01, .01, .01, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Draw skybox
         glCullFace(GL_FRONT);
 
         shdr_use(&skybox_shader);
@@ -326,12 +326,11 @@ int main() {
         
         shdr_draw(&skybox_vertex_buffer);
 
-        glClear(GL_DEPTH_BUFFER_BIT);
-
         // Draw world objects
-        // Mouse dog
+        glClear(GL_DEPTH_BUFFER_BIT);
         glCullFace(GL_BACK);
 
+        // Mouse dog
         shdr_use(&three_dee_shader);
         vxbf_use(&mouse_dog_vertex_buffer);
 
@@ -380,8 +379,6 @@ int main() {
             }
         }
         
-        glClear(GL_DEPTH_BUFFER_BIT);
-
         // Draw weapon
         if (weapon_visible) {
             shdr_use(&weapon_shader);
@@ -408,9 +405,13 @@ int main() {
         shdr_use(&screen_shader);
         vxbf_use(&screen_vertex_buffer);
 
-        shdr_set_texture(&screen_shader, "texture_data", screen.texture, 0);
+        shdr_set_texture(&screen_shader, "texture_data", screen.color_texture, 0);
+        shdr_set_texture(&screen_shader, "texture_datb", screen.depth_texture, 1);
 
         shdr_set_unformf(&screen_shader, "crt", screen_warp * (.05f + (1 - (camera.fov / 90.f)) / 8.f));
+
+        shdr_set_unformf(&screen_shader, "outline_width", 2.f / screen.width);
+        shdr_set_unformf(&screen_shader, "outline_height", 2.f / screen.height);
         // shdr_set_unformf(&screen_shader, "crt", 0.f);
 
         shdr_draw(&screen_vertex_buffer);
