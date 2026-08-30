@@ -255,14 +255,7 @@ int main() {
 
             else if (event.type == SDL_KEYDOWN) {
                 cmra_process_keypresses(&camera, event.key.keysym.sym, delta_time);
-
-                if (count(pressed_keys.begin(), pressed_keys.end(), event.key.keysym.sym) == 0)
-                    pressed_keys.push_back(event.key.keysym.sym);
-            }
-
-            else if (event.type == SDL_KEYUP) {
-                auto key_location = find(pressed_keys.begin(), pressed_keys.end(), event.key.keysym.sym);
-
+                
                 switch (event.key.keysym.sym) {
                     case SDLK_F1:
                         weapon_visible = !weapon_visible;
@@ -279,6 +272,13 @@ int main() {
                     default:
                         break;
                 }
+
+                if (count(pressed_keys.begin(), pressed_keys.end(), event.key.keysym.sym) == 0)
+                    pressed_keys.push_back(event.key.keysym.sym);
+            }
+
+            else if (event.type == SDL_KEYUP) {
+                auto key_location = find(pressed_keys.begin(), pressed_keys.end(), event.key.keysym.sym);
 
                 if (key_location != pressed_keys.end())
                     pressed_keys.erase(key_location);
