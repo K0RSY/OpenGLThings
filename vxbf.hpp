@@ -20,7 +20,6 @@ typedef struct {
 } vxbf;
 
 // Define
-// TODO: Unite objcs and VAO
 vxbf vxbf_init(
     float* vertecies, uint* indices,
     uint vertecies_size, uint indices_size,
