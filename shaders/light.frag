@@ -12,7 +12,7 @@ void main() {
     
     vec4 finalCol = texture(texture_data, finalTex);
 
-    finalCol.a *= ((Zbf) * 3);
+    finalCol.a *= min(((Zbf) * 3), 1);
     
     FragColor = finalCol;
 }

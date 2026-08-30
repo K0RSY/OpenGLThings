@@ -161,6 +161,9 @@ uint shdr_init_texture(const char* path) {
     } else if (color_channels_number >= 4) {
         color_mode = GL_RGBA;
     }
+
+    int x = color_mode == GL_RGBA;
+    cout << path << x << endl;
     
     glTexImage2D(GL_TEXTURE_2D, 0, color_mode, texture_width, texture_height, 0, color_mode, GL_UNSIGNED_BYTE, texture_data);
     glGenerateMipmap(GL_TEXTURE_2D);
