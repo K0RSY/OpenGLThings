@@ -6,7 +6,6 @@
 #include <string>
 #include <fstream>
 
-#define OBJC_STRIDE 8
 #define objc_pointer(value) &(value[0])
 
 using namespace std;
@@ -17,11 +16,13 @@ typedef struct {
 } objc;
 
 // Define
+// TODO: Make something with theese ugly methonds
 vector<string> objc_split(string str, const char* delimiter, uint delimiter_size = 1);
 vector<string> objc_sublist_to_end(vector<string> list, uint start = 1);
 vector<float> objc_strl_to_floatl(vector<string> list);
-void objc_append_list(vector<float>* list, vector<float> list_to_append); // TODO: Fix this shit with templates
+void objc_append_list(vector<float>* list, vector<float> list_to_append);
 
+// TODO: Optimise this
 objc objc_init(const char* path);
 
 // Implement
@@ -91,7 +92,7 @@ objc objc_init(const char* path) {
                     objc_append_list(&(object.vertecies), vn[vertex[2] - 1]);
                     objc_append_list(&(object.vertecies), vt[vertex[1] - 1]);
                 }
-                uint last_vertex_index = object.vertecies.size() / OBJC_STRIDE - 1;
+                uint last_vertex_index = object.vertecies.size() / 8 - 1;
 
                 switch (vertex_part.size()) {
                     case 3:

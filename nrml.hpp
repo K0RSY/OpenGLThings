@@ -13,7 +13,7 @@ using namespace glm;
 void nrml_generate_normals(
     float* vertecies, uint* indices,
     uint vertecies_size, uint indices_size,
-    uint nor_data_start
+    uint vertecies_pos_offset, uint vertecies_nor_offset, uint vertecies_stride
 );
 
 // Implement

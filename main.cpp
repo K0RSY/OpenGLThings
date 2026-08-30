@@ -183,35 +183,19 @@ int main() {
         21, 23, 20,
     };
 
-    objc mouse_dog_object = objc_init("models/mouse_dog.obj");
-
-    // vector<string> list = {"1", "2"};
-    // cout << mdls_join(list, ",");
-
-    // nrml_generate_normals(
-    //     mouse_dog_vertecies, mouse_dog_indices,
-    //     sizeof(mouse_dog_vertecies) / sizeof(float), sizeof(mouse_dog_indices) / sizeof(uint),
-    //     0, 3, 8
-    // );
-
+    nrml_generate_normals(
+        cube_vertecies, cube_indices,
+        sizeof(cube_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
+        0, 3, 8
+    );
+    
+    scrn screen = scrn_init(width, height);
+    
     uint pos_nor_tex_attribute_sizes[] = {3, 3, 2};
     uint pos_tex_attribute_sizes[] = {3, 2};
 
-    scrn screen = scrn_init(width, height);
-
-    shdr mouse_dog_shader = shdr_init(
-        objc_pointer(mouse_dog_object.vertecies), objc_pointer(mouse_dog_object.indices),
-        mouse_dog_object.vertecies.size(), mouse_dog_object.indices.size(),
-        "shaders/mouse_dog.vert", "shaders/mouse_dog.frag",
-        3, pos_nor_tex_attribute_sizes
-    );
-
-    // shdr mouse_dog_shader = shdr_init(
-    //     cube_vertecies, cube_indices,
-    //     sizeof(cube_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
-    //     "shaders/mouse_dog.vert", "shaders/mouse_dog.frag",
-    //     3, pos_nor_tex_attribute_sizes
-    // );
+    objc mouse_dog_object = objc_init("models/mouse_dog.obj");
+    shdr mouse_dog_shader = shdr_init(&mouse_dog_object, "shaders/mouse_dog.vert", "shaders/mouse_dog.frag");
 
     shdr light_shader = shdr_init(
         plane_vertecies, plane_indices,
@@ -252,6 +236,7 @@ int main() {
     mouse_dog_model = scale(mouse_dog_model, vec3(8.f, 8.f, 8.f));
     mouse_dog_model = translate(mouse_dog_model, vec3(0.f, -.1f, 0.f));
 
+    // TODO: Make separate file with mainloop handling
     SDL_Event event;
     while (run) {
         // Other things
@@ -265,7 +250,7 @@ int main() {
             else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
                 width = event.window.data1;
                 height = event.window.data2;
-                scrn_set_dimentions(&screen, width, height);
+                // scrn_set_dimentions(&screen, width, height);
             }
 
             else if (event.type == SDL_KEYDOWN) {

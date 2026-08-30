@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "rdfl.hpp"
+#include "objc.hpp"
 
 using namespace std;
 using namespace glm;
@@ -19,18 +20,20 @@ typedef struct {
 } shdr;
 
 // Define
+// TODO: Separate shdr and VBO with VAO and EBO. Maybe unite objcs and VBO with EBO
 shdr shdr_init(
     float* vertecies, uint* indices,
     uint vertecies_size, uint indices_size,
     const char* vert_path, const char* frag_path,
     uint attribute_size, uint* attribute_sizes
 );
+shdr shdr_init(objc* object, const char* vert_path, const char* frag_path);
 uint shdr_init_texture(const char* path);
 
 void shdr_set_unformf(shdr* shader, const char* name, float value);
 void shdr_set_unformi(shdr* shader, const char* name, int value);
 void shdr_set_unformm4(shdr* shader, const char* name, float* value_pointer);
-void shdr_set_unformv3(shdr* shader, const char* name, float* value_pointer);
+void shdr_set_unformv3(shdr* shader, const char* name, vec3 value);
 void shdr_set_unformv4(shdr* shader, const char* name, vec4 value);
 void shdr_set_texture(shdr* shader, const char* name, uint texture, uint id);
 
@@ -113,6 +116,17 @@ shdr shdr_init(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     return shader;
+};
+
+shdr shdr_init(objc* object, const char* vert_path, const char* frag_path) {
+    uint pos_nor_tex_attribute_sizes[] = {3, 3, 2};
+
+    return shdr_init(
+        objc_pointer((*object).vertecies), objc_pointer((*object).indices),
+        (*object).vertecies.size(), (*object).indices.size(),
+        "shaders/mouse_dog.vert", "shaders/mouse_dog.frag",
+        3, pos_nor_tex_attribute_sizes
+    );
 };
 
 uint shdr_init_texture(const char* path) {
