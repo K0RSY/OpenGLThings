@@ -17,7 +17,6 @@
 #include "cmra.hpp"
 #include "scrn.hpp"
 #include "nrml.hpp"
-#include "objc.hpp"
 
 #define unfduration std::chrono::nanoseconds
 #define second_ratio 1000000000L
@@ -195,35 +194,36 @@ int main() {
     uint pos_tex_attribute_sizes[] = {3, 2};
 
     objc mouse_dog_object = objc_init("models/mouse_dog.obj");
-    shdr mouse_dog_shader = shdr_init(&mouse_dog_object, "shaders/mouse_dog.vert", "shaders/mouse_dog.frag");
+    vxbf mouse_dog_vertex_buffer = vxbf_init(&mouse_dog_object);
+    shdr three_dee_shader = shdr_init("shaders/three_dee.vert", "shaders/three_dee.frag");
 
-    shdr light_shader = shdr_init(
+    vxbf light_vertex_buffer = vxbf_init(
         plane_vertecies, plane_indices,
         sizeof(plane_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
-        "shaders/light.vert", "shaders/light.frag",
         2, pos_tex_attribute_sizes
     );
+    shdr too_dee_shader = shdr_init("shaders/too_dee.vert", "shaders/too_dee.frag");
 
-    shdr weapon_shader = shdr_init(
+    vxbf weapon_vertex_buffer = vxbf_init(
         plane_vertecies, plane_indices,
         sizeof(plane_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
-        "shaders/weapon.vert", "shaders/weapon.frag",
         2, pos_tex_attribute_sizes
     );
+    shdr weapon_shader = shdr_init("shaders/weapon.vert", "shaders/weapon.frag");
 
-    shdr screen_shader = shdr_init(
+    vxbf screen_vertex_buffer = vxbf_init(
         screen_vertecies, plane_indices,
         sizeof(screen_vertecies) / sizeof(float), sizeof(plane_indices) / sizeof(uint),
-        "shaders/screen.vert", "shaders/screen.frag",
         2, pos_tex_attribute_sizes
     );
+    shdr screen_shader = shdr_init("shaders/screen.vert", "shaders/screen.frag");
 
-    shdr skybox_shader = shdr_init(
+    vxbf skybox_vertex_buffer = vxbf_init(
         skybox_vertecies, cube_indices,
         sizeof(skybox_vertecies) / sizeof(float), sizeof(cube_indices) / sizeof(uint),
-        "shaders/skybox.vert", "shaders/skybox.frag",
         2, pos_tex_attribute_sizes
     );
+    shdr skybox_shader = shdr_init("shaders/skybox.vert", "shaders/skybox.frag");
 
     uint mouse_dog_texture = shdr_init_texture("assets/mouse_dog.png");
     uint noise_texture = shdr_init_texture("assets/noise.png");
@@ -314,6 +314,7 @@ int main() {
         glCullFace(GL_FRONT);
 
         shdr_use(&skybox_shader);
+        vxbf_use(&skybox_vertex_buffer);
 
         shdr_set_texture(&skybox_shader, "texture_data", skybox_texture, 0);
         shdr_set_texture(&skybox_shader, "texture_datb", noise_texture, 1);
@@ -323,7 +324,7 @@ int main() {
         shdr_set_unformm4(&skybox_shader, "view", value_ptr(skybox));
         shdr_set_unformm4(&skybox_shader, "projection", value_ptr(projection));
         
-        shdr_draw(&skybox_shader);
+        shdr_draw(&skybox_vertex_buffer);
 
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -331,50 +332,51 @@ int main() {
         // Mouse dog
         glCullFace(GL_BACK);
 
-        shdr_use(&mouse_dog_shader);
+        shdr_use(&three_dee_shader);
+        vxbf_use(&mouse_dog_vertex_buffer);
 
-        shdr_set_texture(&mouse_dog_shader, "texture_data", mouse_dog_texture, 0);
-        shdr_set_texture(&mouse_dog_shader, "texture_datb", noise_texture, 1);
+        shdr_set_texture(&three_dee_shader, "texture_data", mouse_dog_texture, 0);
+        shdr_set_texture(&three_dee_shader, "texture_datb", noise_texture, 1);
 
-        shdr_set_unformf(&mouse_dog_shader, "time", time);
-        shdr_set_unformf(&mouse_dog_shader, "ambient_light", ambient_light);
+        shdr_set_unformf(&three_dee_shader, "time", time);
+        shdr_set_unformf(&three_dee_shader, "ambient_light", ambient_light);
         
-        shdr_set_unformv3(&mouse_dog_shader, "camera_pos", camera.position);
-        shdr_set_unformv4(&mouse_dog_shader, "global_light", global_light);
+        shdr_set_unformv3(&three_dee_shader, "camera_pos", camera.position);
+        shdr_set_unformv4(&three_dee_shader, "global_light", global_light);
         for (uint i = 0; i < light_count; i++) {
             char stri[16];
             sprintf(stri, "lights[%d]", i);
-            shdr_set_unformv4(&mouse_dog_shader, stri, lights[i]);
+            shdr_set_unformv4(&three_dee_shader, stri, lights[i]);
         }
 
-        shdr_set_unformm4(&mouse_dog_shader, "model", value_ptr(mouse_dog_model));
-        shdr_set_unformm4(&mouse_dog_shader, "normal_model", value_ptr(mouse_dog_normal_model));
-        shdr_set_unformm4(&mouse_dog_shader, "view", value_ptr(view));
-        shdr_set_unformm4(&mouse_dog_shader, "projection", value_ptr(projection));
+        shdr_set_unformm4(&three_dee_shader, "model", value_ptr(mouse_dog_model));
+        shdr_set_unformm4(&three_dee_shader, "normal_model", value_ptr(mouse_dog_normal_model));
+        shdr_set_unformm4(&three_dee_shader, "view", value_ptr(view));
+        shdr_set_unformm4(&three_dee_shader, "projection", value_ptr(projection));
         
-        shdr_draw(&mouse_dog_shader);
+        shdr_draw(&mouse_dog_vertex_buffer);
 
         // Light
         lights[1] = vec4(0.f, abs(sin(time)) * 10 + 1.f, 0.f, lights[1].w);
 
         if (lights_visible) {
-            shdr_use(&light_shader);
+            shdr_use(&too_dee_shader);
+            vxbf_use(&light_vertex_buffer);
 
-            shdr_set_texture(&light_shader, "texture_data", light_texture, 0);
+            shdr_set_texture(&too_dee_shader, "texture_data", light_texture, 0);
             
-            shdr_set_unformm4(&light_shader, "view", value_ptr(view));
-            shdr_set_unformm4(&light_shader, "projection", value_ptr(projection));
+            shdr_set_unformm4(&too_dee_shader, "view", value_ptr(view));
+            shdr_set_unformm4(&too_dee_shader, "projection", value_ptr(projection));
 
-            
             for (uint i = 0; i < light_count; i++) {
                 light_model = mat4(1.f);
                 light_model = translate(light_model, vec3(lights[i]));
                 light_model = scale(light_model, vec3(.5f));
                 light_model = light_model * billboard;
 
-                shdr_set_unformm4(&light_shader, "model", value_ptr(light_model));
+                shdr_set_unformm4(&too_dee_shader, "model", value_ptr(light_model));
 
-                shdr_draw(&light_shader);
+                shdr_draw(&light_vertex_buffer);
             }
         }
         
@@ -383,6 +385,7 @@ int main() {
         // Draw weapon
         if (weapon_visible) {
             shdr_use(&weapon_shader);
+            vxbf_use(&weapon_vertex_buffer);
 
             shdr_set_texture(&weapon_shader, "texture_data", weapon_texture, 0);
 
@@ -393,7 +396,7 @@ int main() {
             shdr_set_unformf(&weapon_shader, "sin_time_y", sin_time_y);
             shdr_set_unformf(&weapon_shader, "sin_time_x", sin_time_x);
 
-            shdr_draw(&weapon_shader);
+            shdr_draw(&weapon_vertex_buffer);
         }
 
         // Draw in window
@@ -403,13 +406,14 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shdr_use(&screen_shader);
+        vxbf_use(&screen_vertex_buffer);
 
         shdr_set_texture(&screen_shader, "texture_data", screen.texture, 0);
 
         shdr_set_unformf(&screen_shader, "crt", screen_warp * (.05f + (1 - (camera.fov / 90.f)) / 8.f));
         // shdr_set_unformf(&screen_shader, "crt", 0.f);
 
-        shdr_draw(&screen_shader);
+        shdr_draw(&screen_vertex_buffer);
 
         SDL_GL_SwapWindow(window);
 
@@ -421,10 +425,10 @@ int main() {
     SDL_DestroyWindow(window);
     SDL_Quit();
     
-    shdr_clean(&mouse_dog_shader);
-    shdr_clean(&weapon_shader);
-    shdr_clean(&skybox_shader);
-    shdr_clean(&light_shader);
+    vxbf_clean(&mouse_dog_vertex_buffer);
+    vxbf_clean(&weapon_vertex_buffer);
+    vxbf_clean(&skybox_vertex_buffer);
+    vxbf_clean(&light_vertex_buffer);
     scrn_clean(&screen);
 
     return 0;
