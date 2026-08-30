@@ -34,7 +34,7 @@ void main() {
 
     float Nor = vNor;
     for (int i = 0; i < light_count; i++) {
-        Nor += pow(max(dot(reflect(normalize(wPos - lights[i].xyz), normal), normalize(camera_pos - wPos)), 0), 16) * lights[i].w * 2;
+        Nor += pow(max(dot(reflect(normalize(wPos - lights[i].xyz), normal), normalize(camera_pos - wPos)), 0), 16) * lights[i].w;
     }
 
     finalCol.rgb *= Nor;

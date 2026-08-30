@@ -53,8 +53,8 @@ int main() {
     mat4 light_rotate;
     const uint light_count = 2;
     vec4 lights[] = {
-        vec4(3.f, 3.f, 3.f, .5f),
-        vec4(-3.f, -3.f, -3.f, .5f),
+        vec4(3.f, 3.f, 3.f, 1.f),
+        vec4(0.f, 10.f, 0.f, 1.f),
     };
     vec4 global_light = vec4(normalize(vec3(-1.f, 0.5f, -.9f)), 1.f);
     float ambient_light = .1f;
@@ -255,7 +255,7 @@ int main() {
 
             else if (event.type == SDL_KEYDOWN) {
                 cmra_process_keypresses(&camera, event.key.keysym.sym, delta_time);
-                
+
                 switch (event.key.keysym.sym) {
                     case SDLK_F1:
                         weapon_visible = !weapon_visible;
@@ -355,11 +355,7 @@ int main() {
         shdr_draw(&mouse_dog_shader);
 
         // Light
-        // light_rotate = rotate(mat4(1.f), radians(30 * delta_time), vec3(0.f, 1.f, 0.f));
-
-        for (uint i = 0; i < light_count; i++) {
-            lights[i] = light_rotate * lights[i];
-        }
+        lights[1] = vec4(0.f, abs(sin(time)) * 10 + 1.f, 0.f, lights[1].w);
 
         if (lights_visible) {
             shdr_use(&light_shader);

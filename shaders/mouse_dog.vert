@@ -33,7 +33,7 @@ void main() {
    normal = normalize(mat3(normal_model) * aNor);
    vNor = ambient_light + max(dot(normal, global_light.xyz), 0) * global_light.w;
    for (int i = 0; i < light_count; i++) {
-      vNor += max(dot(normal, normalize(lights[i].xyz - wPos)), 0) * lights[i].w;
+      vNor += max(max(dot(normal, normalize(lights[i].xyz - wPos)), 0) * lights[i].w / distance(lights[i].xyz, wPos) * 4, 0.f);
    }
    
    // float coeff = sin(time * 5 + Pos.x / 2 + Pos.y / 2) / 5;
