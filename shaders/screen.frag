@@ -4,7 +4,7 @@ in vec2 Tex;
 
 out vec4 FragColor;
 
-#define OUTLINE_THRESHOLD 0.001f
+#define OUTLINE_THRESHOLD 0.002f
 #define BIG 100000
 
 uniform sampler2D texture_data;
